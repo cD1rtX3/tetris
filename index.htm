@@ -105,6 +105,7 @@
 				lastKey = null
 				let p = document.getElementById("c" + id)
 				p.innerHTML = "Press any key..."
+				p.blur()
 				let a = setInterval(function(){
 					if (lastKey != null) {
 						controls[id] = lastKey
