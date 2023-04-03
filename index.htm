@@ -56,6 +56,15 @@
 				}
 			}
 			var controls = ["ArrowLeft", "ArrowRight", "KeyZ", "ArrowUp", "ArrowDown", "Space", "KeyC", "Escape"]
+			for (let i = 0; i < 8; i++) {
+				let h = localStorage.getItem("c" + i)
+				if (h != null) {
+					controls[i] = h
+					document.getElementById("c" + i).innerHTML = h
+				} else {
+					localStorage.setItem("c" + i, controls[i])
+				}
+			}
 			function vecRot (r) {
 				let x = [...arguments]
 				x.shift()
@@ -99,6 +108,7 @@
 				let a = setInterval(function(){
 					if (lastKey != null) {
 						controls[id] = lastKey
+						localStorage.setItem("c" + id, controls[id])
 						p.innerHTML = controls[id]
 						clearInterval(a)
 						setting = false
