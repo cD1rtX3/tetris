@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Tetris</title>
+		<link rel="icon" type="image/x-png" href="data:image/x-png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAmZJREFUOE+lU01IVFEYPd97b97MODU2jvlkRptpXFgZjWG0MLBUiCDoByFoYyIFgQtpbFsStClobwtDWrWqTat+LCiFQnJM6YdyRpvsjck4+cfMe/PuvfEmy6Rw44F7ufe73z3c757zETYJ2uR9UKTl5tkCM8FkQGYAYzLkIisDA4pre0irMXtTsHOLMRUUPNDNKlZm4BEceUcBri0WOAO4R4ZDFsgYEhacEqwlgTwvhyvHoBkKloWBXKkPtKOhi/cYSTrmdGBMm8beplm8n1RBezyI7ma4/aEE43UlyKc5htMdODXkR9sow53CI0xobkGBg5f5vuxH6va68DgwhdhxHdfva0grblw8msWViTKUnjRhfCe8Ni7h0EtCbKQMvfm7mNW2C6puvMpr03HqEvN45rdwviKJvnQIK9tUnKlPIzatwaxagFVgyHi6EXi1hM6EhBlawMMqJijSdINr+ltqMecw7PWivTwBt2ViXPVBDRDuzflgeUyYGRXLOxtR905FJJXClCOHVCgkqO7EwJiVXwRxgNs/LpObLc5HeEaXeVFkexKQfAGmlPoTECJXzJU4ZNdWQbvan/h/e8ElyYyoEDWmPz1getIHWrWJEFAqwz8codrTgBLPc1v0X/jHSPs7B6PW18Sg0FNla8cCVFmdlYM1LfGB5vjf5vsPwYsom5kcFPqXNQIhQMFQloLh1rH+w6MbEtRfGKrHt9RTpifXEciBUFapDreO9DVuTNBwbqgGZN1CLucVJESxTkFELvcSV3jPm/7mzxu+AOiVwh1HVMvnXFeekjXE1MBzE7hmi/UHm+7Gn6d7+nhCje6AAAAAAElFTkSuQmCC">
+	</head>
+	<body style="background-color: #111; color: #eee;">
+		<center><div id="menu">
+			<button onclick="play()"><h1>Play!</h1></button>
+			<h4 style="margin-bottom: 0.15em;">Controls (click to change):</h4>
+			<table><tbody>
+				<tr onclick="setCtrls(0)"><td>Move left:</td><td><button id="c0">ArrowLeft</button></td></tr>
+				<tr onclick="setCtrls(1)"><td>Move right:</td><td><button id="c1">ArrowRight</button></td></tr>
+				<tr onclick="setCtrls(2)"><td>Rotate left:</td><td><button id="c2">KeyZ</button></td></tr>
+				<tr onclick="setCtrls(3)"><td>Rotate right:</td><td><button id="c3">ArrowUp</button></td></tr>
+				<tr onclick="setCtrls(4)"><td>Soft drop:</td><td><button id="c4">ArrowDown</button></td></tr>
+				<tr onclick="setCtrls(5)"><td>Hard drop:</td><td><button id="c5">Space</button></td></tr>
+				<tr onclick="setCtrls(6)"><td>Hold:</td><td><button id="c6">KeyC</button></td></tr>
+				<tr onclick="setCtrls(7)"><td>Pause:</td><td><button id="c7">Escape</button></td></tr>
+			</tbody></table>
+			</div></center>
+		<center id="field" style="visibility: hidden;">
+			<div>
+				<p id="score"></p>
+			</div>
+			<table style="border: 8px solid transparent;"><tbody>
+				<tr style="text-align: center;"><td>Held</td><td></td><td>Next</td></tr>
+				<tr>
+					<td>
+						<canvas id="held" width="86" height="300"></canvas>
+					</td>
+					<td>
+						<canvas id="canvas" width="156" height="300"></canvas>
+					</td>
+					<td>
+						<canvas id="next" width="86" height="300"></canvas>
+					</td>
+			</tr></tbody></table>
+			<p id="gameover"></p>
+		</center>
+		<script>
+			var keysDown = {}
+			var lastKey
+			document.body.addEventListener("keydown", function(e){
+				keysDown[e.code] = true
+				lastKey = e.code
+			})
+			document.body.addEventListener("keyup", function(e){
+				keysDown[e.code] = undefined
+			})
+			var ctx = document.getElementById("canvas").getContext("2d")
+			function _r (s/*, [x, y, w, h]..*/) {
+				ctx.fillStyle = s
+				for (let i = 1; i < arguments.length; i++) {
+					ctx.fillRect(...arguments[i])
+				}
+			}
+			var controls = ["ArrowLeft", "ArrowRight", "KeyZ", "ArrowUp", "ArrowDown", "Space", "KeyC", "Escape"]
+			function vecRot (r) {
+				let x = [...arguments]
+				x.shift()
+				if (((4+(r)%4))%2 != 0) {for (let i = 0; i < x.length; i++) {x[i] = [ x[i][1], -x[i][0]]}}
+				if (((4+(r)%4))%4 >= 2) {for (let i = 0; i < x.length; i++) {x[i] = [-x[i][0], -x[i][1]]}}
+				return x
+			}
+			function vecAdd (a, b) {
+				if (a.length != b.length) {return}
+				return [...(Array(a.length).keys())].map(x => a[x] + b[x])
+			}
+			function vecSub (a, b) {
+				if (a.length != b.length) {return}
+				return [...(Array(a.length).keys())].map(x => a[x] - b[x])
+			}
+			function vecComp (a, b) {
+				if (a.length != b.length) {return false}
+				for (let i = 0; i < a.length; i++) {if (a[i] != b[i]) {return false}}
+				return true
+			}
+			function genBag (len) {
+				let r, i
+				let a = [...(Array(7*Math.trunc(len / 7)).keys())].map(x => x % 7)
+				for (i = [0, 1, 2, 3, 4, 5, 6]; i.length > 7 - (len % 7); i.splice(r, 1)) {
+					r = Math.trunc((i.length)*Math.random())
+					a.push(i[r])
+				}
+				let b = []
+				for (i = [...(Array(len).keys())]; i.length > 0; i.splice(r, 1)) {
+					r = Math.trunc(Math.random()*(i.length))
+					b.push(a[i[r]])
+				}
+				return b
+			}
+			let setting = false
+			function setCtrls (id) {if (!setting) {
+				setting = true
+				lastKey = null
+				let p = document.getElementById("c" + id)
+				p.innerHTML = "Press any key..."
+				let a = setInterval(function(){
+					if (lastKey != null) {
+						controls[id] = lastKey
+						p.innerHTML = controls[id]
+						clearInterval(a)
+						setting = false
+					}
+				}, 10)
+			}}
+			function play () { if (!setting) {
+				document.getElementById("menu").innerHTML = ""
+				document.getElementById("field").style = ""
+				let lines = 0n
+				let score = 0n
+				let scTbl = [0, 100, 300, 500, 800, 100, 200, 400, 800, 1200, 1600]
+				let level = 1n
+				let kcTbl = [ // type, rotation, iteration
+					[[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+					[[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+					[[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+					[[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+					[[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[1,0],[1,-1],[0,2],[1,2]],[[0,0],[0,0],[0,0],[0,0],[0,0]],[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]],
+					[[[0,0],[-1,0],[2,0],[-1,0],[2,0]],[[-1,0],[0,0],[0,0],[0,1],[0,-2]],[[-1,1],[1,1],[-2,1],[1,0],[-2,0]],[[0,1],[0,1],[0,1],[0,-1],[0,2]]],
+					[[[0,0]],[[0,-1]],[[-1,-1]],[[-1,0]]]
+				]
+				let next = []
+				next.push(...genBag(7))
+				let block = [4, 20, next.shift(), 0]
+				let ghost = [...block]
+				let minos = [
+					[[0,0], [ 1, 0], [ 0, 1], [-1, 0]],
+					[[0,0], [ 1, 1], [ 0, 1], [-1, 0]],
+					[[0,0], [ 1, 0], [ 0, 1], [-1, 1]],
+					[[0,0], [ 1, 0], [-1, 1], [-1, 0]],
+					[[0,0], [ 1, 0], [ 1, 1], [-1, 0]], 
+					[[0,0], [ 1, 0], [ 2, 0], [-1, 0]],
+					[[0,0], [ 1, 0], [ 0, 1], [ 1, 1]]
+				]
+				let playfield = []; for (let i = 0; i < 40; i++) {playfield.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
+				let colours = ["#b0b", "#0e0", "#e00", "#00e", "#e70", "#0ee", "#ee0", "#999"]
+				let gravity = 1
+				let softdrop = 1
+				let harddrop = 0
+				let das = 10
+				let lockreset = 15
+				let lockdelay = 30
+				let lowest = 20
+				let rotate = true
+				function getSRS (angle, step) {
+					let r = (4+((block[3]-angle)%4))%4
+					let rprime = (4+((block[3])%4))%4
+					return vecSub(kcTbl[block[2]][r][step], kcTbl[block[2]][rprime][step])
+				}
+				let lockdown = false
+				let held = null
+				let canHold = true
+				let spun = 0
+				let backtoback = false
+				let paused = false
+				let gameover = ""
+				var gmLp = setInterval(function(){
+					if (next.length <= 4) {next.push(...genBag(7))}
+					_r("#111", [0, 0, 156, 300])
+					if (!paused) {
+						// input handling
+							if (rotate && ((keysDown[controls[2]] || keysDown[controls[3]]) && !(keysDown[controls[2]] && keysDown[controls[3]]))) {
+								rotate = false
+								let collide = true
+								if (keysDown[controls[3]]) { // clockwise
+									block[3]++; if (spun != 2) {spun = 1}
+									for (let i = 0; i < 5 && collide; i++) {
+										block = vecAdd(block, [...getSRS(1, i), 0, 0])
+										collide = false
+										for (let j = 0; j < 4; j++) {
+											let m = vecAdd(vecRot((4+((block[3])%4))%4, minos[block[2]][j])[0], [block[0], block[1]])
+											if (m[1] < 0 || playfield[m[1]][m[0]] != 0) {
+												collide = true
+												block = vecSub(block, [...getSRS(1, i), 0, 0])
+												break
+											}
+										}
+										if ((i == 4) && !collide) {spun = 2}
+									}
+									if (collide) {
+										block[3]--; if (spun != 2) {spun = 0}
+									}
+								}
+								if (keysDown[controls[2]]) { // anticlockwise
+									block[3]--; if (spun != 2) {spun = 1}
+									for (let i = 0; i < 5 && collide; i++) {
+										block = vecAdd(block, [...getSRS(-1, i), 0, 0])
+										collide = false
+										for (let j = 0; j < 4; j++) {
+											let m = vecAdd(vecRot((4+((block[3])%4))%4, minos[block[2]][j])[0], [block[0], block[1]])
+											if (m[1] < 0 || playfield[m[1]][m[0]] != 0) {
+												collide = true
+												block = vecSub(block, [...getSRS(-1, i), 0, 0])
+												break
+											}
+										}
+									}
+									if (collide) {
+										block[3]++; if (spun != 2) {spun = 0}
+									}
+								}
+								if (!collide && lockreset-- > 0) {lockdelay = Math.min(3*(29-Number(level)), 30)}
+							} else if (!((keysDown[controls[2]] || keysDown[controls[3]]) && !(keysDown[controls[2]] && keysDown[controls[3]]))) {
+								rotate = true
+							}
+							if (keysDown[controls[5]]) {harddrop++} else {harddrop = 0}
+							if (keysDown[controls[4]]) {softdrop = 20} else {softdrop = 1}
+							if ((keysDown[controls[0]] || keysDown[controls[1]]) && !(keysDown[controls[0]] && keysDown[controls[1]])) {
+								das = Math.max(--das, 0);
+								if (keysDown[controls[1]]) {
+									switch (das) {
+										case 0:
+											das = 2
+										case 9:
+											let c = true
+											block[0]++
+											for (let i = 0; i < 4; i++) {
+												let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+												if (p[0] > 9 || playfield[p[1]][p[0]] != 0) {
+													block[0]--; c = false; break
+												}
+											}
+											if (c && lockreset-- > 0) {lockdelay = Math.min(3*(29-Number(level)), 30)}
+									}
+								}
+								if (keysDown[controls[0]]) {
+									switch (das) {
+										case 0:
+											das = 2
+										case 9:
+											let c = true
+											block[0]--
+											for (let i = 0; i < 4; i++) {
+												let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+												if (p[0] < 0 || playfield[p[1]][p[0]] != 0) {
+													block[0]++; c = false; break
+												}
+											}
+											if (c && lockreset-- > 0) {lockdelay = Math.min(3*(29-Number(level)), 30)}
+									}
+								}
+							} else {
+								das = 10
+							}
+							if (keysDown[controls[6]] && canHold) {
+								spun = 0
+								canHold = false
+								let temp = block[2]
+								block = [4, 20, held !== null ? held : next.shift(), 0]
+								held = temp
+								for (let i = 0; i < 4; i++) {
+									let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+									if (playfield[p[1]][p[0]] != 0) {
+										clearInterval(gmLp); gameover = "Game Over &mdash; Block out"
+									}
+								}
+								gravity = 1
+								lockdown = false; lockdelay = Math.min(3*(29-Number(level)), 30); lockreset = 15; lowest = 20
+							}
+						{
+							gravity += (softdrop/60)/((0.8-(0.007*Number(level)))**(Number(level)-1))
+							if (harddrop != 1) { // gravity/soft drop
+								while (gravity > 1) {
+									block[1]--
+									lockdown = false
+									for (let i = 0; i < 4; i++) {
+										let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {
+											block[1]++; lockdown = true; break
+										}
+									}
+									if (!lockdown && spun != 2) {spun = 0}
+									if (softdrop > 1 && !lockdown) {
+										score++
+									}
+									gravity--
+								}
+								if (lowest > block[1]) {
+									lockreset = 15
+									lowest = block[1]
+								}
+								block[1]--
+								lockdown = false
+								for (let i = 0; i < 4; i++) {
+									let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+									if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {
+										lockdown = true; break
+									}
+								}
+								block[1]++
+								if (lockdown) {lockdelay--}
+							} else { // hard drop
+								lockdown = false
+								while (!lockdown) {
+									block[1]--
+									for (let i = 0; i < 4; i++) {
+										let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {
+											block[1]++; lockdown = true; break
+										}
+									}
+									if (!lockdown) {score += 2n; if (spun != 2) {spun = 0}}
+								}
+								lockdelay = 0
+							}
+						}
+						if (lockdown && lockdelay <= 0) { // lockdown, line clearing, and scoring
+							let lockOut = true
+							for (let i = 0; i < 4; i++) {
+								let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+								playfield[p[1]][p[0]] = block[2] + 1
+								if (p[1] < 20) {lockOut = false}
+							}
+							if (lockOut) {clearInterval(gmLp); gameover = "Game Over &mdash; Lock out"}
+							let scIndex = 0
+							for (let i = block[1] + 2; i >= Math.max(block[1] - 2, 0); i--) {
+								let j = 0
+								for (; j < 10; j++) {
+									if (playfield[i][j] == 0) {break}
+								}
+								if (j == 10) {
+									scIndex++; lines++
+									playfield.splice(i, 1)
+									playfield.push([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+								}
+							}
+							let bonus = (scIndex > 0 && backtoback) ? 1.5 : 1
+							if (block[2] == 0) {
+								if (spun == 2) {scIndex += 7} else if (spun == 1) {
+									let corners = 0
+									let topCorners = 0
+									let p
+									for (let i = 0; i < 4; i++) {
+										p = vecAdd([...vecRot(i + block[3], [-1, 1])[0], 0, 0], block)
+										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++; if (i < 2) {topCorners++}}
+									}
+									if (corners > 2) {
+										 if (topCorners > 1) {scIndex += 7} else {scIndex += 5}
+									}
+								}
+							}
+							switch (scIndex) {
+								case 1:
+								case 2:
+								case 3:
+									bonus = 1
+									backtoback = false
+								case 5:
+								case 7:
+								case 0:
+									break
+								default:
+									backtoback = true
+
+							}
+							score += BigInt(Number(level)*bonus*scTbl[scIndex])
+							level = (lines / 10n) + 1n
+							block = [4, 20, next.shift(), 0]
+							for (let i = 0; i < 4; i++) {
+								let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
+								if (playfield[p[1]][p[0]] != 0) {
+									clearInterval(gmLp); gameover = "Game Over &mdash; Block out"
+								}
+							}
+							gravity = 1
+							lockdown = false; lockdelay = Math.min(3*(29-Number(level)), 30); lockreset = 15; lowest = 20
+							canHold = true
+						}
+						{ // ghost
+							ghost = [...block]
+							let ghostDown = false
+							while (!ghostDown) {
+								ghost[1]--
+								for (let i = 0; i < 4; i++) {
+									let p = vecAdd([ghost[0], ghost[1]], vecRot(ghost[3], minos[ghost[2]][i])[0])
+									if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {
+										ghost[1]++; ghostDown = true; break
+									}
+								}
+							}
+						}
+						{ // display
+							for (let i = 0; i < 21; i++) {
+								for (let j = 0; j < 10; j++) {
+									if (playfield[i][j] != 0) {
+										_r(colours[playfield[i][j] - 1], [8 + (14*j), 278 - (14*i), 14, 14])
+									}
+								}
+							}
+							{
+								let b = vecRot(block[3], ...minos[block[2]])
+								for (let i = 0; i < 4; i++) {
+									b[i] = [(b[i][0] + block[0]) * 14 + 8, 278 - ((b[i][1] + block[1]) * 14), 14, 14]
+								}
+								_r(colours[block[2]] + (lockdown ? (Math.ceil(lockdelay / (Math.min(3*(29-Number(level)), 30) / 15))).toString(16) : "f"), ...b)
+							}
+							if (ghost[1] != block[1]) {
+								let b = vecRot(ghost[3], ...minos[ghost[2]])
+								for (let i = 0; i < 4; i++) {
+									b[i] = [(b[i][0] + ghost[0]) * 14 + 8, 278 - ((b[i][1] + ghost[1]) * 14), 14, 14]
+								}
+								_r(colours[ghost[2]] + '4', ...b)
+							}
+							_r("#111", [0, 0, 8, 300], [148, 0, 8, 300], [8, 0, 148, 8], [8, 292, 148, 8])
+							_r("#eee", [2, 2, 4, 296], [150, 2, 4, 296], [6, 2, 144, 4], [6, 294, 144, 4])
+							{
+								heldCtx = document.getElementById("held").getContext("2d")
+								let hr = function (s) {
+									heldCtx.fillStyle = s
+									for (let i = 1; i < arguments.length; i++) {
+										heldCtx.fillRect(...arguments[i])
+									}
+								}
+								hr("#111", [0, 0, 86, 86])
+								hr("#eee", [2, 2, 4, 82], [80, 2, 4, 82], [6, 2, 74, 4], [6, 80, 74, 4])
+								if (held !== null) {
+									let b = [colours[held]]
+									for (let i = 0; i < 4; i++) {
+										b.push([29 + (14*minos[held][i][0]) + (held < 5 ? 7 : 0), 43 - ((14*minos[held][i][1]) + (held == 5 ? 7 : 0)), 14, 14])
+									}
+									hr(...b)
+								}
+							}
+							{
+								nextCtx = document.getElementById("next").getContext("2d")
+								let nr = function (s) {
+									nextCtx.fillStyle = s
+									for (let i = 1; i < arguments.length; i++) {
+										nextCtx.fillRect(...arguments[i])
+									}
+								}
+								nr("#111", [0, 0, 86, 196])
+								for (let i = 0; i < 3; i++) {
+									let b = [colours[next[i]]]
+									for (let j = 0; j < 4; j++) {
+										b.push([29 + (14*minos[next[i]][j][0]) + (next[i] < 5 ? 7 : 0), (43+(56*i)) - ((14*minos[next[i]][j][1]) + (next[i] == 5 ? 7 : 0)), 14, 14])
+									}
+									nr(...b)
+								}
+								nr("#eee", [2, 2, 4, 192], [80, 2, 4, 192], [6, 2, 74, 4], [6, 190, 74, 4])
+							}
+							document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}`
+							document.getElementById("gameover").innerHTML = gameover
+						}
+						if (keysDown[controls[7]]) {paused = true; keysDown[controls[7]] = undefined}
+					} else {
+						document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br><br>Game Paused`
+						if (keysDown[controls[7]]) {paused = false; keysDown[controls[7]] = undefined}
+					}
+				}, 16)
+			}}
+		</script>
+	</body>
+</html>
