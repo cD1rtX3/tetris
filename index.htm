@@ -40,7 +40,7 @@
 			<p id="gameover"></p>
 		</center>
 		<script>
-			function(){
+			{
 				let h = localStorage.getItem("hi")
 				if (h != null) {
 					document.getElementById("high").innerHTML = `<b>High Score:</b> ${h}`
@@ -48,7 +48,7 @@
 					document.getElementById("high").innerHTML = "<b>High Score:</b> 0"
 					localStorage.setItem("hi", "0")
 				}
-			}()
+			}
 			var keysDown = {}
 			var lastKey
 			document.body.addEventListener("keydown", function(e){
