@@ -40,13 +40,6 @@
 			document.body.addEventListener("keyup", function(e){
 				keysDown[e.code] = undefined
 			})
-			var ctx = document.getElementById("canvas").getContext("2d")
-			function _r (s/*, [x, y, w, h]..*/) {
-				ctx.fillStyle = s
-				for (let i = 1; i < arguments.length; i++) {
-					ctx.fillRect(...arguments[i])
-				}
-			}
 			var controls = ["ArrowLeft", "ArrowRight", "KeyZ", "ArrowUp", "ArrowDown", "Space", "KeyC", "Escape"]
 			for (let i = 0; i < 8; i++) {
 				let h = localStorage.getItem("c" + i)
@@ -91,7 +84,7 @@
 				}
 				return b
 			}
-			let setting = false
+			var setting = false
 			function setCtrls (id) {if (!setting) {
 				setting = true
 				lastKey = null
@@ -111,7 +104,14 @@
 			function play () { if (!setting) {
 				document.getElementById("menu").innerHTML = ""
 				document.getElementById("field").innerHTML = '<div><p id="score"></p></div><table style="border: 8px solid transparent;"><tbody><tr style="text-align: center;"><td>Held</td><td></td><td>Next</td></tr><tr><td><canvas id="held" width="86" height="300"></canvas></td><td><canvas id="canvas" width="156" height="300"></canvas></td><td><canvas id="next" width="86" height="300"></canvas></td></tr></tbody></table><p id="gameover"></p>'
-				document.getElementById("field").style = ""
+				document.getElementById("field").style = ""	
+				let ctx = document.getElementById("canvas").getContext("2d")
+				function _r (s/*, [x, y, w, h]..*/) {
+					ctx.fillStyle = s
+					for (let i = 1; i < arguments.length; i++) {
+						ctx.fillRect(...arguments[i])
+					}
+				}
 				let high = localStorage.getItem("hi")
 				let lines = 0n
 				let score = 0n
