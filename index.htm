@@ -7,6 +7,7 @@
 	<body style="background-color: #111; color: #eee;">
 		<center><div id="menu">
 			<button onclick="play()"><h1>Play!</h1></button><table><tbody><tr><td style="text-align: left;">
+			<p id="high"></p>
 			<h4 style="margin-bottom: 0.15em;">Controls (click to change):</h4>
 			<table><tbody>
 				<tr onclick="setCtrls(0)"><td>Move left:</td><td><button id="c0">ArrowLeft</button></td></tr>
@@ -39,6 +40,15 @@
 			<p id="gameover"></p>
 		</center>
 		<script>
+			function(){
+				let h = localStorage.getItem("hi")
+				if (h != null) {
+					document.getElementById("high").innerHTML = `<b>High Score:</b> ${h}`
+				} else {
+					document.getElementById("high").innerHTML = "<b>High Score:</b> 0"
+					localStorage.setItem("hi", "0")
+				}
+			}()
 			var keysDown = {}
 			var lastKey
 			document.body.addEventListener("keydown", function(e){
@@ -119,15 +129,7 @@
 			function play () { if (!setting) {
 				document.getElementById("menu").innerHTML = ""
 				document.getElementById("field").style = ""
-				let high
-				function(){
-					let h = localStorage.getItem("hi")
-					if (h != null) {
-						high = Number(h)
-					} else {
-						high = 0; localStorage.setItem("hi", "0")
-					}
-				}()
+				let high = localStorage.getItem("hi")
 				let lines = 0n
 				let score = 0n
 				let scTbl = [0, 100, 300, 500, 800, 100, 200, 400, 800, 1200, 1600]
