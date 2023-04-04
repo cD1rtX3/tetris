@@ -20,25 +20,7 @@
 				<tr onclick="setCtrls(7)"><td>Pause:</td><td><button id="c7">Escape</button></td></tr>
 			</tbody></table>
 			</td></tr></tbody></table></div></center>
-		<center id="field" style="visibility: hidden;">
-			<div>
-				<p id="score"></p>
-			</div>
-			<table style="border: 8px solid transparent;"><tbody>
-				<tr style="text-align: center;"><td>Held</td><td></td><td>Next</td></tr>
-				<tr>
-					<td>
-						<canvas id="held" width="86" height="300"></canvas>
-					</td>
-					<td>
-						<canvas id="canvas" width="156" height="300"></canvas>
-					</td>
-					<td>
-						<canvas id="next" width="86" height="300"></canvas>
-					</td>
-			</tr></tbody></table>
-			<p id="gameover"></p>
-		</center>
+		<center id="field" style="visibility: hidden;"></center>
 		<script>
 			{
 				let h = localStorage.getItem("hi")
@@ -128,6 +110,7 @@
 			}}
 			function play () { if (!setting) {
 				document.getElementById("menu").innerHTML = ""
+				document.getElementById("field").innerHTML = '<div><p id="score"></p></div><table style="border: 8px solid transparent;"><tbody><tr style="text-align: center;"><td>Held</td><td></td><td>Next</td></tr><tr><td><canvas id="held" width="86" height="300"></canvas></td><td><canvas id="canvas" width="156" height="300"></canvas></td><td><canvas id="next" width="86" height="300"></canvas></td></tr></tbody></table><p id="gameover"></p>'
 				document.getElementById("field").style = ""
 				let high = localStorage.getItem("hi")
 				let lines = 0n
