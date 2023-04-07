@@ -102,6 +102,7 @@
 				}, 10)
 			}}
 			function play () { if (!setting) {
+				let gO = null
 				document.getElementById("menu").innerHTML = ""
 				document.getElementById("field").innerHTML = '<div><p id="score"></p></div><table style="border: 8px solid transparent;"><tbody><tr style="text-align: center;"><td>Held</td><td></td><td>Next</td></tr><tr><td><canvas id="held" width="86" height="300"></canvas></td><td><canvas id="canvas" width="156" height="300"></canvas></td><td><canvas id="next" width="86" height="300"></canvas></td></tr></tbody></table><p id="gameover"></p>'
 				document.getElementById("field").style = ""	
@@ -258,7 +259,7 @@
 								for (let i = 0; i < 4; i++) {
 									let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
 									if (playfield[p[1]][p[0]] != 0) {
-										clearInterval(gmLp); gameover = "Game Over &mdash; Block out"
+										clearInterval(gmLp); gameover = `Game Over &mdash; Block out<br>Press ${controls[7]} to restart`
 										if (score > high) {localStorage.setItem("hi", `${score}`)}
 									}
 								}
@@ -319,7 +320,7 @@
 								playfield[p[1]][p[0]] = block[2] + 1
 								if (p[1] < 20) {lockOut = false}
 							}
-							if (lockOut) {clearInterval(gmLp); gameover = "Game Over &mdash; Lock out"; if (score > high) {localStorage.setItem("hi", `${score}`)}}
+							if (lockOut) {clearInterval(gmLp); gameover = `Game Over &mdash; Lock out<br>Press ${controls[7]} to restart`; if (score > high) {localStorage.setItem("hi", `${score}`)}}
 							let scIndex = 0
 							for (let i = block[1] + 2; i >= Math.max(block[1] - 2, 0); i--) {
 								let j = 0
@@ -367,7 +368,7 @@
 							for (let i = 0; i < 4; i++) {
 								let p = vecAdd([block[0], block[1]], vecRot(block[3], minos[block[2]][i])[0])
 								if (playfield[p[1]][p[0]] != 0) {
-									clearInterval(gmLp); gameover = "Game Over &mdash; Block out"
+									clearInterval(gmLp); gameover = `Game Over &mdash; Block out<br>Press ${controls[7]} to restart`
 									if (score > high) {localStorage.setItem("hi", `${score}`)}
 								}
 							}
@@ -453,9 +454,10 @@
 						}
 						if (keysDown[controls[7]]) {paused = true; keysDown[controls[7]] = undefined}
 					} else {
-						document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br><br>Game Paused`
+						document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>High: ${high}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br><br>Game Paused`
 						if (keysDown[controls[7]]) {paused = false; keysDown[controls[7]] = undefined}
 					}
+					if (gameover != "") {gO=setInterval(function(){if(keysDown[controls[7]]){clearInterval(gO);play()}},10)}
 				}, 16)
 			}}
 		</script>
