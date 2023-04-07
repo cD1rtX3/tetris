@@ -457,7 +457,7 @@
 						document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>High: ${high}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br><br>Game Paused`
 						if (keysDown[controls[7]]) {paused = false; keysDown[controls[7]] = undefined}
 					}
-					if (gameover != "") {gO=setInterval(function(){if(keysDown[controls[7]]){clearInterval(gO);play()}},10)}
+					if (gameover != "") {gO=setInterval(function(){if(keysDown[controls[7]]){keysDown[controls[7]]=undefined;clearInterval(gO);play()}},10)}
 				}, 16)
 			}}
 		</script>
