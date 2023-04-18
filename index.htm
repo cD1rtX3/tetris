@@ -22,14 +22,10 @@
 			</td></tr></tbody></table></div></center>
 		<center id="field" style="visibility: hidden;"></center>
 		<script>
-			{
+			for {
+				if (typeof localStorage.getItem("hi") != "string") {localStorage.setItem("hi", "0")}
 				let h = localStorage.getItem("hi")
-				if (h != null) {
-					document.getElementById("high").innerHTML = `<b>High Score:</b> ${h}`
-				} else {
-					document.getElementById("high").innerHTML = "<b>High Score:</b> 0"
-					localStorage.setItem("hi", "0")
-				}
+				document.getElementById("high").innerHTML = `<b>High Score:</b> ${h}`
 			}
 			var keysDown = {}
 			var lastKey
