@@ -346,16 +346,15 @@
 							} else if (block[2] < 5) {
 								if (spun == 2) {scIndex += 7} else if (spun == 1) {
 									let corners = 0
-									let edges = 0
+									let edge = false
 									let p
 									for (let i = 0; i < 4; i++) {
 										p = vecAdd([...vecRot(i + block[3], [-1, 1])[0], 0, 0], block)
 										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++}
 									}
-									p = vecAdd([...vecRot(block[3], [[0,-1], [0,-1], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edges++}
-									p = vecAdd([...vecRot(block[3], [0,-1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edges++}
-									if (corners == 3) {
-										 if (edges == 2) {scIndex += 7} else {scIndex += 5}
+									p = vecAdd([...vecRot(block[3], [[1, 0], [-1,0], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); console.log(p); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edge = true; corners++}
+									if (corners > 2) {
+										 if (edge) {scIndex += 7} else {scIndex += 5}
 									}
 								}
 							}
