@@ -340,21 +340,21 @@
 										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++; if (i < 2) {topCorners++}}
 									}
 									if (corners > 2) {
-										 if (topCorners > 1) {scIndex += 7} else {scIndex += 5}
+										 if (topCorners == 2) {scIndex += 7} else {scIndex += 5}
 									}
 								}
 							} else if (block[2] < 5) {
 								if (spun == 2) {scIndex += 7} else if (spun == 1) {
 									let corners = 0
-									let edge = false
+									let topCorners = 0
 									let p
 									for (let i = 0; i < 4; i++) {
 										p = vecAdd([...vecRot(i + block[3], [-1, 1])[0], 0, 0], block)
-										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++}
+										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++; if (i < 2) {topCorners++}}
 									}
-									p = vecAdd([...vecRot(block[3], [[1, 0], [-1,0], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edge = true; corners++}
+									p = vecAdd([...vecRot(block[3], [[1, 0], [-1,0], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {topCorners++; corners++}
 									if (corners > 2) {
-										 if (edge) {scIndex += 7} else {scIndex += 5}
+										 if (topCorners == 2) {scIndex += 7} else {scIndex += 5}
 									}
 								}
 							}
