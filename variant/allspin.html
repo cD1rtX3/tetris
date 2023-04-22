@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<title>Tetris</title>
 		<link rel="icon" type="image/x-png" href="data:image/x-png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAmZJREFUOE+lU01IVFEYPd97b97MODU2jvlkRptpXFgZjWG0MLBUiCDoByFoYyIFgQtpbFsStClobwtDWrWqTat+LCiFQnJM6YdyRpvsjck4+cfMe/PuvfEmy6Rw44F7ufe73z3c757zETYJ2uR9UKTl5tkCM8FkQGYAYzLkIisDA4pre0irMXtTsHOLMRUUPNDNKlZm4BEceUcBri0WOAO4R4ZDFsgYEhacEqwlgTwvhyvHoBkKloWBXKkPtKOhi/cYSTrmdGBMm8beplm8n1RBezyI7ma4/aEE43UlyKc5htMdODXkR9sow53CI0xobkGBg5f5vuxH6va68DgwhdhxHdfva0grblw8msWViTKUnjRhfCe8Ni7h0EtCbKQMvfm7mNW2C6puvMpr03HqEvN45rdwviKJvnQIK9tUnKlPIzatwaxagFVgyHi6EXi1hM6EhBlawMMqJijSdINr+ltqMecw7PWivTwBt2ViXPVBDRDuzflgeUyYGRXLOxtR905FJJXClCOHVCgkqO7EwJiVXwRxgNs/LpObLc5HeEaXeVFkexKQfAGmlPoTECJXzJU4ZNdWQbvan/h/e8ElyYyoEDWmPz1getIHWrWJEFAqwz8codrTgBLPc1v0X/jHSPs7B6PW18Sg0FNla8cCVFmdlYM1LfGB5vjf5vsPwYsom5kcFPqXNQIhQMFQloLh1rH+w6MbEtRfGKrHt9RTpifXEciBUFapDreO9DVuTNBwbqgGZN1CLucVJESxTkFELvcSV3jPm/7mzxu+AOiVwh1HVMvnXFeekjXE1MBzE7hmi/UHm+7Gn6d7+nhCje6AAAAAAElFTkSuQmCC">
@@ -352,7 +352,7 @@
 										p = vecAdd([...vecRot(i + block[3], [-1, 1])[0], 0, 0], block)
 										if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {corners++}
 									}
-									p = vecAdd([...vecRot(block[3], [[1, 0], [-1,0], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edges++}
+									p = vecAdd([...vecRot(block[3], [[0,-1], [0,-1], [0, 1], [0, 1]][block[2] - 1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edges++}
 									p = vecAdd([...vecRot(block[3], [0,-1])[0], 0, 0], block); if (p[1] < 0 || playfield[p[1]][p[0]] != 0) {edges++}
 									if (corners == 3) {
 										 if (edges == 2) {scIndex += 7} else {scIndex += 5}
