@@ -456,6 +456,7 @@
 							document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>High: ${high}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br>Time: ${getTimer(--timer)}`
 							if (timer <= 0) {
 								gameover = "Game Over &mdash; Time out"
+								clearInterval(gmLp)
 							}
 							document.getElementById("gameover").innerHTML = gameover
 						}
