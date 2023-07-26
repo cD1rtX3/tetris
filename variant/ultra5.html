@@ -453,8 +453,8 @@
 								}
 								nr("#eee", [2, 2, 4, 192], [80, 2, 4, 192], [6, 2, 74, 4], [6, 190, 74, 4])
 							}
-							document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>High: ${high}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br>Time: ${getTimer(--time)}`
-							if (time <= 0) {
+							document.getElementById("score").innerHTML = `Lines: ${lines}<br>Score: ${score}<br>High: ${high}<br>Level: ${level >= 19n ? "&starf;" : ""}${level}${level >= 19n ? "&starf;" : ""}<br>Time: ${getTimer(--timer)}`
+							if (timer <= 0) {
 								gameover = "Game Over &mdash; Time out"
 							}
 							document.getElementById("gameover").innerHTML = gameover
